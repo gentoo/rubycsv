@@ -35,7 +35,7 @@ end
 
 # helper functions
 def clean_date(text_date) # reformat date in to big endian format
-    return Date.parse(text_date).strftime("%Y-%m-%d")
+    return Date.strptime(text_date, '%m/%d/%Y').strftime("%Y-%m-%d")
 end
 
 def clean_money(text_money) # nuke all but digits, negation, decimal place
@@ -83,7 +83,7 @@ end
 
 # parse CSV file
 
-CSV.open($csv_filename,'r') do |row|
+CSV.foreach($csv_filename,'r:ISO-8859-1') do |row|
     $line += 1 
 
     if($line == 1) #this is the header row, store to assign as keys on later rows, stripping whitespace
@@ -95,5 +95,3 @@ CSV.open($csv_filename,'r') do |row|
         puts erbrender.result(thisrow.get_binding)
     end
 end
-
-
