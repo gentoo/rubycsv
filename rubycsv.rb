@@ -95,16 +95,24 @@ end
 
 # parse CSV file
 
+$data = {}
+
 CSV.foreach($csv_filename,'r:ISO-8859-1') do |row|
     $line += 1 
-
     if($line == 1) #this is the header row, store to assign as keys on later rows, stripping whitespace
         $header_row = row.collect{|val| val.strip}
     else
-        thisrow = CSVRow.new(row)
-        #print "line: #{thisrow.csvrow.inspect}\n"
-        erbrender = ERB.new($erb_template, safe_level=nil, trim_mode='-')
-        puts erbrender.result(thisrow.get_binding).rstrip()
-        puts "\n"
+        $data[$line] = row
     end
+end
+
+# TODO: support more sort options!
+$data.keys.sort.reverse.each do |key|
+    row = $data[key]
+    $line = key
+    thisrow = CSVRow.new(row)
+    #print "line: #{thisrow.csvrow.inspect}\n"
+    erbrender = ERB.new($erb_template, safe_level=nil, trim_mode='-')
+    puts erbrender.result(thisrow.get_binding).rstrip()
+    puts "\n"
 end
