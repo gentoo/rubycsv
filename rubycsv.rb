@@ -59,6 +59,18 @@ def clean_text(text) # get rid of anything that's not a word or space, make mult
     return text.gsub(/[^\w \]\[\@\.\,\'\"]/,'').gsub(/[ ]+/,' ').strip;
 end
 
+def negate_num(text_money_or_num)
+  replacement = text_money_or_num =~ /-/ ? '' : '-'
+  return text_money_or_num.sub(/^-?(\d)/, replacement + '\1')
+end
+
+def positive_num(text_money_or_num)
+  return text_money_or_num.sub(/^-?(\d)/, '\1')
+end
+def negative_num(text_money_or_num)
+  return text_money_or_num.sub(/^-?(\d)/, '-\1')
+end
+
 # lookup values in arrays.  Table is a 2D array, 
 # where the first value is the string returned, 
 # and the following are substrings to attempt to match against the value
