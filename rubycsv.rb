@@ -103,7 +103,8 @@ CSV.foreach($csv_filename,'r:ISO-8859-1') do |row|
     else
         thisrow = CSVRow.new(row)
         #print "line: #{thisrow.csvrow.inspect}\n"
-        erbrender = ERB.new($erb_template, nil, '<>')
-        puts erbrender.result(thisrow.get_binding)
+        erbrender = ERB.new($erb_template, safe_level=nil, trim_mode='-')
+        puts erbrender.result(thisrow.get_binding).rstrip()
+        puts "\n"
     end
 end
