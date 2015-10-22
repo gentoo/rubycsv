@@ -19,7 +19,7 @@ $categories = [["Income:Paypal", "DEFAULT"],
 ]
 
 # The trailing spaces on each line are important!
-$validtypes = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed' ]
+$validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed' ]
 $memoprefix = ';MEMO '
 transcur = tablematch($currency,csvrow['Currency']) + " "
 memo = csvrow["Balance Impact"] == 'Memo' ? $memoprefix : ''
@@ -37,7 +37,7 @@ if transcur == '$ ' then
   balance = '= ' + transcur + clean_money(balval)
 end
 -%>
-<% if (($validtypes.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item") && (csvrow['Type'] != 'Transfer to Bank Initiated')) -%>
+<% if (($validstatus.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item") && (csvrow['Type'] != 'Transfer to Bank Initiated')) -%>
 ; CSV "<%= $csv_filename %>", line: <%= $line %>
 <%= memo %><%= clean_date(csvrow['Date']) %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
 <% -%>
