@@ -27,9 +27,14 @@ refid = csvrow["Reference Txn ID"]
 if refid.length() > 0 then
   refid = ' Reference: ' + refid + ' '
 end
+# Depending on the version of the CSV data, the Balance MIGHT be in:
+# Balanace
+# Available Balance
+# Or just missing!
+balval = csvrow.select { |k,v| ['Balance', 'Available Balance'].include? k }.values[0]
 balance = ''
 if transcur == '$ ' then
-  balance = '= ' + transcur + clean_money(csvrow['Balance'])
+  balance = '= ' + transcur + clean_money(balval)
 end
 -%>
 <% if (($validtypes.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item")) -%>
@@ -62,7 +67,7 @@ end
 <%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% end -%>
-<%= memo %>    ; Balance: <%= clean_money(csvrow['Balance']) %>
+<%= memo %>    ; Balance: <%= clean_money(balval) %>
 <%= memo %>    ; Gross: <%= clean_money(csvrow['Gross']) %>
 <%= memo %>    ; Net: <%= clean_money(csvrow['Net']) %>
 <% end -%>
