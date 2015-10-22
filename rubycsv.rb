@@ -3,6 +3,7 @@
 require 'csv'
 require 'erb'
 require 'date'
+require 'tzinfo'
 
 # globals
 $template_file = ARGV[0]
@@ -31,6 +32,10 @@ class CSVRow
     def get_binding()
         return binding()
     end
+
+	def [](key)
+		@csvrow[key]
+	end
 end
 
 # helper functions
@@ -96,23 +101,92 @@ end
 # parse CSV file
 
 $data = {}
+$header_data = {}
+$seen_csv_header = false
+known_paypal_headers = [
+  'Address Line 1', 'Address Line 2/District', 
+  'Address Line 2/District/Neighborhood', 'Address Status', 
+  'Auction Site', 'Available Balance', 'Balance', 'Balance Impact', 
+  'Buyer ID', 'Closing Date', 'Contact Phone Number',
+  'Counterparty Status', 'Country', 'Currency', 'Custom Number',
+  'Date', 'Fee', 'From Email Address', 'Gross', 'Insurance Amount',
+  'Invoice Number', 'Item ID', 'Item Title', 'Item URL', 'Name',
+  'Net', 'Note', 
+  'Option 1 Name', 'Option 1 Value', 
+  'Option 2 Name', 'Option 2 Value', 
+  'Payment Type', 'Quantity', 'Receipt ID', 'Reference Txn ID',
+  'Sales Tax', 'Shipping address', 'Shipping and Handling Amount',
+  'State/Province',
+  'State/Province/Region/County/Territory/Prefecture/Republic',
+  'Status', 'Subject', 'Subscription Number',
+  'Time', 'Time Zone', 'To Email Address',
+  'Town/City', 'Transaction ID', 'Type',
+  'Zip/Postal Code',
+]
 
-CSV.foreach($csv_filename,'r:ISO-8859-1') do |row|
+filemode = 'r:ISO-8859-1'
+filemode = 'r:bom|utf-8'
+
+CSV.foreach($csv_filename, filemode) do |row|
     $line += 1 
-    if($line == 1) #this is the header row, store to assign as keys on later rows, stripping whitespace
-        $header_row = row.collect{|val| val.strip}
+	#print "; ", row, "\n"
+	row = row.collect{ |val| val.nil? ? '' : val.strip}
+	if row.length == 2 && !$seen_csv_header then
+		$header_data[row[0]] = row[1]
+	elsif(!$seen_csv_header && (row & known_paypal_headers).length > 10) then
+        $header_row = row
+		$seen_csv_header = true
     else
-        $data[$line] = row
+        $data[$line] = CSVRow.new(row)
     end
 end
 
+def paypal_row_to_time(row)
+	date = row['Date']
+	# Sadly Paypal data precision sucks; if the seconds are missing, let's just add them as zero
+	time = row['Time'].sub(/^(\d{2}:\d{2})$/,'\1:00')
+	timezone = row['Time Zone']
+	begin
+		tz = TZInfo::Timezone.get(timezone)
+		dt = DateTime.strptime([date, time].join(' '), '%m/%d/%Y %H:%M:%S')
+		tz.local_to_utc(dt).strftime('%s')
+	rescue TZInfo::InvalidTimezoneIdentifier
+		dt = DateTime.strptime([date, time, timezone].join(' '), '%m/%d/%Y %H:%M:%S %Z')
+		dt.strftime('%s')
+	end
+end
+
+def sorter_key(v)
+	key, row = v
+	key
+end
+def sorter_date_time_tz(v)
+	#STDERR.print v, "\n"
+	key, row = v
+	# This last part is too hacky :-(
+	# we need to know if the file is ascending or decending in the first place I think.
+	sortkey = []
+	#sortkey << paypal_row_to_time(row)
+	sortkey << key * $file_direction
+end
+
+# This is needed because the paypal file order is NOT consistent!
+# Early paypal data was newest-first
+# New paypal data is oldest-first
+_ = $data.sort
+t1 = paypal_row_to_time(_.last[1])
+t2 = paypal_row_to_time(_.first[1])
+$file_direction = t1 <=> t2
+
 # TODO: support more sort options!
-$data.keys.sort.reverse.each do |key|
-    row = $data[key]
+#STDERR.print $data.methods.sort
+#&method(:inc))
+$data.sort_by(&method(:sorter_date_time_tz)).each do |tuple|
+	key, row = tuple
+    #row = $data[key]
     $line = key
-    thisrow = CSVRow.new(row)
     #print "line: #{thisrow.csvrow.inspect}\n"
     erbrender = ERB.new($erb_template, safe_level=nil, trim_mode='-')
-    puts erbrender.result(thisrow.get_binding).rstrip()
+    puts erbrender.result(row.get_binding).rstrip()
     puts "\n"
 end
