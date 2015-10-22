@@ -37,11 +37,11 @@ if transcur == '$ ' then
   balance = '= ' + transcur + clean_money(balval)
 end
 -%>
-<% if (($validtypes.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item")) -%>
+<% if (($validtypes.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item") && (csvrow['Type'] != 'Transfer to Bank Initiated')) -%>
 ; CSV "<%= $csv_filename %>", line: <%= $line %>
 <%= memo %><%= clean_date(csvrow['Date']) %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
 <% -%>
-<% if csvrow['Type'] =~ /Funds.*Bank Account/ then -%>
+<% if csvrow['Type'] =~ /Funds.*Bank Account/ or csvrow['Type'] =~ /Transfer.*Bank/ then -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    Assets:Bank    <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
