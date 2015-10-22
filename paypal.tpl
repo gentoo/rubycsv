@@ -56,10 +56,17 @@ end
 # The Fee is refunded, and needs flipping manually
 # (alternatively, we ignore the fee on the refund, and change the fee refund special transaction AWAY from being a memo)
 # The Net & Gross amounts are already reversed, but this means we need to flip the sign on the Income entry
+# TODO: should Income:Paypal be the reverse account for the default case?
 -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + negative_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<% -%>
+<% elsif csvrow['Type'] =~ /Payment Sent/ then -%>
+<% # TODO: improve this code, we override the DEFAULT in a dumb way -%>
+<%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
+<%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
+<%= memo %>    <%= tablematch($categories+[['Expenses:Unspecified','DEFAULT']], clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% else -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
