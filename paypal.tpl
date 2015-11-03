@@ -66,6 +66,12 @@ end
 # (alternatively, we ignore the fee on the refund, and change the fee refund special transaction AWAY from being a memo)
 # The Net & Gross amounts are already reversed, but this means we need to flip the sign on the Income entry
 # TODO: should Income:Paypal be the reverse account for the default case?
+# This is problematic as a type, because the Refund transaction is NOT clear if
+# it's refunding money we have recieved, or if we recieved a refund for a
+# payment sent.
+# Our date has examples of both:
+# PaymentSent/Refund: 49S75814H86810608, 4JX09116V5200501C
+# Web Accept Payment Received/Refund: 3TV525461B3251548, 1V72559214700303D
 -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + negative_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
