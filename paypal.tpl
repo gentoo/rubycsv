@@ -18,6 +18,15 @@ $categories = [["Income:Paypal", "DEFAULT"],
       "Hetzner Online AG"],
 ]
 
+def bank_transfer_acct(row)
+	dt = DateTime.strptime(row['Date'], '%m/%d/%Y')
+	if dt.year >= 2009
+		'Transfer:Paypal-CapOneMoneyMarket'
+	else
+		'Transfer:Paypal-NetBank'
+	end
+end
+
 # The trailing spaces on each line are important!
 $validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed' ]
 $memoprefix = ';MEMO '
@@ -44,7 +53,7 @@ end
 <% if csvrow['Type'] =~ /Funds.*Bank Account/ or csvrow['Type'] =~ /Transfer.*Bank/ then -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    Assets:Bank    <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<%= memo %>    <%= bank_transfer_acct(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <% -%>
 <% elsif csvrow['Type'] =~ /Temporary Hold/ then -%>
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
