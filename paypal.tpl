@@ -77,7 +77,7 @@ end
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
-<% elsif csvrow['Type'] =~ /Payment Sent/ then -%>
+<% elsif csvrow['Type'] =~ /Payment Sent/ or csvrow['Type'] =~ /Cancell?ed Payment/ then -%>
 <% # TODO: improve this code, we override the DEFAULT in a dumb way -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
