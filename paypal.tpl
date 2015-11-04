@@ -90,6 +90,8 @@ end
 <%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% end -%>
+<%= memo %>    ; Subject: <%= csvrow['Subject'] %>
+<%= memo %>    ; Note: <%= csvrow['Note'] %>
 <%= memo %>    ; Balance: <%= clean_money(balval) %>
 <%= memo %>    ; Gross: <%= clean_money(csvrow['Gross']) %>
 <%= memo %>    ; Net: <%= clean_money(csvrow['Net']) %>
