@@ -55,10 +55,11 @@ end
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= bank_transfer_acct(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <% -%>
-<% elsif csvrow['Type'] =~ /Temporary Hold/ then -%>
+<% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/].any? { |r| csvrow['Type'] =~ r } then -%>
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<%= memo %>    ; SKIP <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<%= memo %>    Transfer:Paypal-Holding
 <% -%>
 <% elsif csvrow['Type'] =~ /Refund/ then
 # The signs of some of the refunds are wrong, so they need special handling
