@@ -10,7 +10,6 @@ $template_file = ARGV[0]
 $csv_filename = ARGV[1]
 $template_text = ""
 $header_row = []
-$line = 0
 
 # evaluate the template in order to get the templates and other variables out
 eval(File.read($template_file))
@@ -39,15 +38,21 @@ class CSVRow
 end
 
 # helper functions
-def clean_date(text_date) # reformat date in to big endian format
-    return Date.strptime(text_date, '%m/%d/%Y').strftime("%Y-%m-%d")
+def clean_date(text_date, date_format="%Y-%m-%d") # reformat date in to big endian format
+    return Date.strptime(text_date, date_format).strftime("%Y-%m-%d")
 end
 
-def clean_money(text_money) # nuke all but digits, negation, decimal place
+
+
+def clean_money(text_money, positive = FALSE) # nuke all but digits, negation, decimal place
     if text_money.nil?
         return ""
     end
-    return text_money.gsub(/[^-\d\.]/,'')
+    if positive
+        return text_money.gsub(/[^\d\.]/,'')
+    else
+        return text_money.gsub(/[^-\d\.]/,'')
+    end
 end
 
 def clean_num(text_num) # nuke all but digits, negation
@@ -130,8 +135,8 @@ known_paypal_headers = [
 filemode = 'r:ISO-8859-1'
 filemode = 'r:bom|utf-8'
 
-CSV.foreach($csv_filename, filemode) do |row|
-    $line += 1 
+csv = CSV.open($csv_filename, filemode)
+csv.each() do |row|
 	#print "; ", row, "\n"
 	row = row.collect{ |val| val.nil? ? '' : val.strip}
 	if row.length == 2 && !$seen_csv_header then
@@ -140,7 +145,7 @@ CSV.foreach($csv_filename, filemode) do |row|
         $header_row = row
 		$seen_csv_header = true
     else
-        $data[$line] = CSVRow.new(row)
+		$data[csv.lineno] = CSVRow.new(row)
     end
 end
 

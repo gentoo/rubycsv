@@ -125,7 +125,7 @@ end
 -%>
 <% if (($validstatus.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item") && (csvrow['Type'] != 'Transfer to Bank Initiated')) -%>
 ; CSV "<%= $csv_filename %>", line: <%= $line %>
-<%= memo %><%= clean_date(csvrow['Date']) %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
+<%= memo %><%= clean_date(csvrow['Date'], '%m/%d/%Y') %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
 <% -%>
 <% if false then -%>
 <% elsif csvrow['Type'] =~ /Currency Conversion/ -%>
