@@ -15,15 +15,15 @@ $categories = [["Income:Paypal", "DEFAULT"],
     [ "Assets:Supplies",
       "dealextreme.com"],
     [ "Expenses:Hosting:Hetzner",
-      "Hetzner Online AG"],
+      "Hetzner Online"], # Hetzner has changed the suffix a few times!
 ]
 
 def bank_transfer_acct(row)
 	dt = DateTime.strptime(row['Date'], '%m/%d/%Y')
 	if dt.year >= 2009
-		'Transfer:Paypal-CapOneMoneyMarket'
+		'Assets:Transfer:Paypal-CapOneMoneyMarket'
 	else
-		'Transfer:Paypal-NetBank'
+		'Assets:Transfer:Paypal-NetBank'
 	end
 end
 
