@@ -18,6 +18,10 @@ $categories = [["Income:Paypal", "DEFAULT"],
       "Hetzner Online"], # Hetzner has changed the suffix a few times!
 ]
 
+def paypal_transfer_acct
+	'Assets:Transfer:Paypal-Holding'
+end
+
 def bank_transfer_acct(row)
 	dt = DateTime.strptime(row['Date'], '%m/%d/%Y')
 	if dt.year >= 2009
@@ -59,7 +63,7 @@ end
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    ; SKIP <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
-<%= memo %>    Transfer:Paypal-Holding
+<%= memo %>    <%= paypal_transfer_acct() %>
 <% -%>
 <% elsif csvrow['Type'] =~ /Refund/ then
 # The signs of some of the refunds are wrong, so they need special handling
