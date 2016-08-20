@@ -9,7 +9,7 @@ $currency = [["Unknown", "DEFAULT"],
     ["GBP", "GBP", ],
 ]
 
-$categories = [["Income:Paypal", "DEFAULT"],
+$categories = [["Income:Donations", "DEFAULT"],
     #[ "Assets:Paypal",
     #    "(To|From) U.S. Dollar", "(To|From) Euro", "(To|From) British Pound", "(To|From) Danish Krone"],
     [ "Assets:Supplies",
@@ -19,7 +19,7 @@ $categories = [["Income:Paypal", "DEFAULT"],
 ]
 
 def paypal_transfer_acct
-	'Assets:Transfer:Paypal-Holding'
+	'Assets:Clearing:Paypal-Holding'
 end
 
 def bank_transfer_acct(row)
