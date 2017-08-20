@@ -145,12 +145,13 @@ def paypal_row_to_time(row)
 	date = row['Date']
 	# Sadly Paypal data precision sucks; if the seconds are missing, let's just add them as zero
 	time = row['Time'].sub(/^(\d{2}:\d{2})$/,'\1:00')
-	timezone = row['Time Zone']
+	timezone = row['Time Zone'] || row['TimeZone']
 	begin
 		tz = TZInfo::Timezone.get(timezone)
 		dt = DateTime.strptime([date, time].join(' '), '%m/%d/%Y %H:%M:%S')
 		tz.local_to_utc(dt).strftime('%s')
 	rescue TZInfo::InvalidTimezoneIdentifier
+		#STDERR.puts [date, time, timezone]
 		dt = DateTime.strptime([date, time, timezone].join(' '), '%m/%d/%Y %H:%M:%S %Z')
 		dt.strftime('%s')
 	end
