@@ -26,9 +26,9 @@ end
 def bank_transfer_acct(row)
 	dt = DateTime.strptime(row['Date'], '%m/%d/%Y')
 	if dt.year >= 2009
-		'Assets:Transfer:Paypal-CapOneMoneyMarket'
+		'Assets:Clearing:Paypal-CapOneMoneyMarket'
 	else
-		'Assets:Transfer:Paypal-NetBank'
+		'Assets:Clearing:Paypal-NetBank'
 	end
 end
 
