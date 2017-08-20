@@ -7,6 +7,7 @@ $currency = [["Unknown", "DEFAULT"],
     ["$", "$", "USD", "US"],
     ["DKK", "DKK", ],
     ["GBP", "GBP", ],
+    ["CZK", "CZK", ],
 ]
 
 $categories = [["Income:Donations", "DEFAULT"],
