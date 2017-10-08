@@ -10,13 +10,24 @@ $currency = [["Unknown", "DEFAULT"],
     ["CZK", "CZK", ],
 ]
 
-$categories = [["Income:Donations", "DEFAULT"],
+$categories = [["Income:Donations:Cash", "DEFAULT"],
     #[ "Assets:Paypal",
     #    "(To|From) U.S. Dollar", "(To|From) Euro", "(To|From) British Pound", "(To|From) Danish Krone"],
     [ "Assets:Supplies",
-      "dealextreme.com"],
+      ".*dealextreme.com"],
     [ "Expenses:Hosting:Hetzner",
-      "Hetzner Online"], # Hetzner has changed the suffix a few times!
+	  ".*Hetzner Online"], # Hetzner has changed the suffix a few times!
+	[ "Assets:Clearing:Paypal-Exchange",
+      ".*Currency Conversion"],
+    [ "Income:Commission",
+	  ".*CafePress.com"],
+	[ "Expenses:Hosting:Amazon",
+      ".*Amazon Web Services"],
+	[ "Expenses:Mail",
+      ".*Traveling Mailbox"],
+    [ "Expenses:Unspecified:Paypal",
+	  ".*General PayPal Debit Card Transaction"],
+
 ]
 
 def paypal_transfer_acct
@@ -30,6 +41,15 @@ def bank_transfer_acct(row)
 	else
 		'Assets:Clearing:Paypal-NetBank'
 	end
+end
+
+def cleantext(txt)
+	txt.gsub(/\n/, ' ').gsub(/^[[:space:]]+|[[:space:]]+$/,'')
+end
+def cleanprefix(txt)
+	txt = cleantext(txt)
+	return ' ' + txt if(txt.length > 0)
+	return ''
 end
 
 # The trailing spaces on each line are important!
@@ -55,7 +75,16 @@ end
 ; CSV "<%= $csv_filename %>", line: <%= $line %>
 <%= memo %><%= clean_date(csvrow['Date']) %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
 <% -%>
-<% if csvrow['Type'] =~ /Funds.*Bank Account/ or csvrow['Type'] =~ /Transfer.*Bank/ then -%>
+<% if false then -%>
+<% elsif csvrow['Type'] =~ /Currency Conversion/ -%>
+<%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
+<%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
+<%= memo %>    Assets:Clearing:Paypal-Exchange  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<% elsif csvrow['Type'] =~ /Debit Card Cash Back Bonus/ -%>
+<%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
+<%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
+<%= memo %>    Income:Rebate  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<% elsif csvrow['Type'] =~ /Funds.*Bank Account/ or csvrow['Type'] =~ /Transfer.*Bank/ then -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= bank_transfer_acct(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
@@ -95,8 +124,11 @@ end
 <%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% end -%>
-<%= memo %>    ; Subject: <%= csvrow['Subject'].gsub(/\n/, ' ') %>
-<%= memo %>    ; Note: <%= csvrow['Note'].gsub(/\n/, ' ') %>
+<%= memo %>    ; Name:<%= cleanprefix(csvrow['Name']) %>
+<%= memo %>    ; To.email:<%= cleanprefix(csvrow['To Email Address']) %>
+<%= memo %>    ; From.email:<%= cleanprefix(csvrow['From Email Address']) %>
+<%= memo %>    ; Subject:<%= cleanprefix(csvrow['Subject']) %>
+<%= memo %>    ; Note:<%= cleanprefix(csvrow['Note']) %>
 <%= memo %>    ; Balance: <%= clean_money(balval) %>
 <%= memo %>    ; Gross: <%= clean_money(csvrow['Gross']) %>
 <%= memo %>    ; Net: <%= clean_money(csvrow['Net']) %>

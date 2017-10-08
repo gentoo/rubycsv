@@ -95,6 +95,8 @@ def tablematch(table, value)
             end
         end
     end
+	#print "  val: #{value} matches #{item}, returning #{rowfirst}\n"
+	STDERR.puts "fallback on #{value}"
     return default
 end
 
@@ -119,7 +121,8 @@ known_paypal_headers = [
   'State/Province',
   'State/Province/Region/County/Territory/Prefecture/Republic',
   'Status', 'Subject', 'Subscription Number',
-  'Time', 'Time Zone', 'To Email Address',
+  'Time', 'Time Zone', 'TimeZone',
+  'To Email Address',
   'Town/City', 'Transaction ID', 'Type',
   'Zip/Postal Code',
 ]
@@ -142,6 +145,10 @@ CSV.foreach($csv_filename, filemode) do |row|
 end
 
 def paypal_row_to_time(row)
+	STDERR.puts row.csvrow
+	if not row.csvrow.include?('Time') then
+		STDERR.puts row
+	end
 	date = row['Date']
 	# Sadly Paypal data precision sucks; if the seconds are missing, let's just add them as zero
 	time = row['Time'].sub(/^(\d{2}:\d{2})$/,'\1:00')
