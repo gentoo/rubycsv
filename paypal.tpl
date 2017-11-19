@@ -25,6 +25,14 @@ $categories = [["Income:Donations:Cash", "DEFAULT"],
       ".*Amazon Web Services"],
 	[ "Expenses:Mail",
       ".*Traveling Mailbox"],
+	[ "Expenses:Phone",
+      # voip.ms, legal company name is '9171-5573 Quebec' d/b/a SwiftVox/Voip.MS
+      ".*(payments@swiftvox.com|9171-5573 Quebec)"],
+    [ "Expenses:Accounting",
+	  # This is the HMAC-SHA1 for the accountant's lowercase name & email, for 2017 July-Dec.
+      ".*(934e2cd08d9fcb1d5ada5ed18a531296f934d553|72adf2611a3676994464fc4156fc3a6c29e2f974)"],
+    #[ "Expenses:Accounting",
+    #  ".*Accounting"],
     [ "Expenses:Unspecified:Paypal",
 	  ".*General PayPal Debit Card Transaction"],
 
@@ -50,6 +58,50 @@ def cleanprefix(txt)
 	txt = cleantext(txt)
 	return ' ' + txt if(txt.length > 0)
 	return ''
+end
+
+# This does the meat of work
+# - Try to match against one of the CSV fields directly
+# - Try to match against a salted hash of lowercase(Email) or lowercase(Name)
+def categorize(cats, row)
+	candidates_columns = [
+		'Name',
+		'To Email Address',
+		'From Email Address',
+		'Subject',
+		'Note',
+	]
+	candidate_text = candidates_columns.map { |x|
+		row[x]
+	}.map { |x|
+		clean_text(x.strip)
+	}.reject{ |x|
+		# Ditch empty cols
+		x.length == 0
+	}.compact.join(' ')
+	# We might not want to expose the email or name of the person here, but we
+	# DO still want to match it!
+	# Use HMAC-SHA1 with a static key 'gentoofoundation'
+	# This means if somebody wants to attack the hashes, they are going to have
+	# to bruteforce it, no rainbow tables.
+	require 'openssl'
+	hmac_hash = 'sha1'
+	hmac_key = 'gentoofoundation'
+	candidate_text_salthashed = [
+		'Name',
+		'To Email Address',
+		'From Email Address',
+	]
+	candidate_hashed = candidates_columns.map { |x|
+		row[x]
+	}.map { |x|
+		clean_text(x.strip.downcase)
+	}.reject{ |x|
+		x.length == 0
+	}.compact.map { |x|
+		OpenSSL::HMAC.hexdigest(hmac_hash, hmac_key, x)
+	}.join(' ')
+	return tablematch(cats, candidate_text + ' ' + candidate_hashed)
 end
 
 # The trailing spaces on each line are important!
@@ -92,7 +144,7 @@ end
 <% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/].any? { |r| csvrow['Type'] =~ r } then -%>
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    ; SKIP <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
+<%= memo %>    ; SKIP <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <%= memo %>    <%= paypal_transfer_acct() %>
 <% -%>
 <% elsif csvrow['Type'] =~ /Refund/ then
@@ -110,18 +162,18 @@ end
 -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + negative_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= categorize(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% elsif csvrow['Type'] =~ /Payment Sent/ or csvrow['Type'] =~ /Cancell?ed Payment/ then -%>
 <% # TODO: improve this code, we override the DEFAULT in a dumb way -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= tablematch($categories+[['Expenses:Unspecified:Paypal','DEFAULT']], clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= categorize($categories+[['Expenses:Unspecified:Paypal','DEFAULT']], csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% else -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= tablematch($categories, clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['From Email Address'])) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% end -%>
 <%= memo %>    ; Name:<%= cleanprefix(csvrow['Name']) %>
