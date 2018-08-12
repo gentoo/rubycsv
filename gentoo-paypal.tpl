@@ -117,7 +117,7 @@ def categorize(cats, row)
 end
 
 # The trailing spaces on each line are important!
-$validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed' ]
+$validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed', 'Updated' ]
 $memoprefix = ';MEMO '
 transcur = tablematch($currency,csvrow['Currency']) + " "
 memo = csvrow["Balance Impact"] == 'Memo' ? $memoprefix : ''
