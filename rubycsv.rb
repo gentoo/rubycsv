@@ -66,7 +66,7 @@ def clean_text(text) # get rid of anything that's not a word or space, make mult
     if text.nil?
         return ""
     end
-    return text.gsub(/[^\w \]\[\@\.\,\'\"]/,'').gsub(/[ ]+/,' ').strip;
+    return text.gsub(/[^[:alnum:][:space:]_\]\[\@\.\,\'\"]/,'').gsub(/[[:space:]]+/,' ').strip;
 end
 
 def negate_num(text_money_or_num)
