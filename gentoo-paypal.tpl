@@ -13,9 +13,13 @@ $currency = [
     ["JPY", "JPY", ],
 ]
 
-$categories = [["Income:Donations:Cash", "DEFAULT"],
+$categories = [["Unknown", "DEFAULT"],
     #[ "Assets:Paypal",
     #    "(To|From) U.S. Dollar", "(To|From) Euro", "(To|From) British Pound", "(To|From) Danish Krone"],
+    [ "Income:Donations:Cash",
+      ".*Gentoo Linux support"],
+    [ "Income:Donations:Cash",
+      ".*Gentoo Sponsorship"],
     [ "Assets:Supplies",
       ".*dealextreme.com"],
     [ "Expenses:Hosting:Hetzner",
