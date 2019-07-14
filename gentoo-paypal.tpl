@@ -1,13 +1,16 @@
 # vim:ft=eruby:
 $erb_template = <<END
 <%
-$currency = [["Unknown", "DEFAULT"],
-    ["CAD", "CAN", "CDN", "CAD"],
-    ["EUR", "€", "EUR"],
+$currency = [
+    ["Unknown", "DEFAULT"],
     ["$", "$", "USD", "US"],
-    ["DKK", "DKK", ],
-    ["GBP", "GBP", ],
+    ["CAD", "CAN", "CDN", "CAD"],
     ["CZK", "CZK", ],
+    ["NOK", "NOK", ],
+    ["DKK", "DKK", ],
+    ["EUR", "€", "EUR"],
+    ["GBP", "GBP", ],
+    ["JPY", "JPY", ],
 ]
 
 $categories = [["Income:Donations:Cash", "DEFAULT"],
