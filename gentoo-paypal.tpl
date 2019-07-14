@@ -58,7 +58,9 @@ $categories = [["Unknown", "DEFAULT"],
       # voip.ms, legal company name is '9171-5573 Quebec' d/b/a SwiftVox/Voip.MS
       ".*(payments@swiftvox.com|9171-5573 Quebec)"],
     [ "Expenses:Accounting",
-	  # This is the HMAC-SHA1 for the accountant's lowercase name & email, for 2017 July-Dec.
+      # This is the HMAC-SHA1 for the accountant's lowercase name & email, for 2017 July-Dec.
+      # It was specifically used in place of the name/email to protect the
+      # identity of the accountant.
       ".*(934e2cd08d9fcb1d5ada5ed18a531296f934d553|72adf2611a3676994464fc4156fc3a6c29e2f974)"],
     #[ "Expenses:Accounting",
     #  ".*Accounting"],
