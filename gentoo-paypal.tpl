@@ -17,11 +17,22 @@ $categories = [["Unknown", "DEFAULT"],
     #[ "Assets:Paypal",
     #    "(To|From) U.S. Dollar", "(To|From) Euro", "(To|From) British Pound", "(To|From) Danish Krone"],
     [ "Income:Donations:Cash",
-      ".*Gentoo Linux support"],
+      ".*Gentoo Linux [sS]upport"],
     [ "Income:Donations:Cash",
       ".*Gentoo Sponsorship"],
-    [ "Assets:Supplies",
-      ".*dealextreme.com"],
+    [ "Income:Donations:Cash",
+      ".*Donate to Gentoo"],
+    [ "Income:Donations:Cash",
+      ".*paypal@mikedoty.name.*amd64"], # Special donations by Mike Doty for AMD64
+    # TODO: this might need to be reported as different income if audited,
+    # check with a CPA
+    [ "Income:Donations:Cash",
+      ".*Developer Conference 2005"],
+    # Unknown why this string appears, but it's used for a few legit donations
+    [ "Income:Donations:Cash",
+      ".*Turtles asked me to"],
+    #[ "Assets:Supplies",
+    #  ".*dealextreme.com"],
     [ "Expenses:Hosting:Hetzner",
 	  ".*Hetzner Online"], # Hetzner has changed the suffix a few times!
     [ "Expenses:Hosting:Hetzner",
@@ -42,6 +53,10 @@ $categories = [["Unknown", "DEFAULT"],
       ".*aws.amazon"],
 	[ "Expenses:Hosting:Amazon",
       ".*AWS.AMAZON"],
+	[ "Expenses:Hosting:Rackspace",
+      ".*RACKSPACE CLOUD"],
+	[ "Expenses:Hosting:OVH",
+      ".*paypal@ovh.net"],
 	[ "Assets:Capital:Computers:Infra",
       ".*Amazon.*Payments"],
 	[ "Assets:Capital:Computers:Infra",
@@ -66,11 +81,38 @@ $categories = [["Unknown", "DEFAULT"],
     #  ".*Accounting"],
     [ "Expenses:Accounting",
       ".*CORPORATE CAPITAL"],
+    [ "Expenses:Events",
+      ".*(9D0425387F676360E|0XX376078W200444L|2SP58554T93029521)"],
+    [ "Expenses:Project:Nitrokey",
+      ".*shop@nitrokey.com"],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201206",
+      ".*@dell.com.*7DY965318L922281C" ],
+    [ "Assets:Capital:Banners:Purchased_GDS7_201811",
+      ".*alice.*7RH17973D71151334"],
+    [ "Income:Donations:Cash",
+      ".*(1V72559214700303D|4DV724475R802903V|1UK96365EK8061355|5JV62057G77109143|1CF08775U3863904J).*Refund" ],
+    [ "Assets:Capital:Computers:Dev:Purchased_GDS5_201106",
+      ".*mattst88.*(4JX09116V5200501C|49S75814H86810608|70U02994SC989423E)" ],
+    [ "Assets:Capital:Computers:Dev:Purchased_GDS5_201107",
+      ".*mattst88.*(6GC40575DU592321S)" ],
+    [ "Expenses:Fees:Legal",
+      ".*OFFICE OF THE NM SOS"],
+    [ "Expenses:Fees:Legal",
+      ".*US PATENT TRADEMARK.*6H108086SY709645J"],
+    [ "Expenses:Fees:Legal",
+      ".*8EE53557TT6255427"],
+    [ "Expenses:Donations",
+      ".*billing@yapc.org.*18380511HB907902B"],
+    [ "Expenses:GSOC:Mentor-Travel-Reimbursement",
+      ".*(1CR38323CY8432902|4KP10148XA437243W|87N49081CL3000742|8XX66840L62895546|25T96197D6407310R|35A20655SN352982E|0K4406155H379924V|62106544S9576952X|95K44436CC206273Y|9G410934RY513593K)"],
+    [ "Expenses:Services", ".*44M47848WL891505S" ],
+    [ "Income:Donations:Cash", ".*88F402144B854453W"],
     [ "Expenses:Unspecified:Paypal",
 	  ".*General PayPal Debit Card Transaction"],
     [ "Expenses:Unspecified:Paypal",
-	  ".*General PayPal Debit Card Transaction"],
-
+      ".*General Payment"],
+    [ "Income:Donations:Cash",
+      ".*(Update to eCheck Received\|Update to Bank Transfer Received\|Update to Payment Received\|Payment Received\|Payment Processed\|Donation Received|Chargeback Settlement|Website Payment)"],
 ]
 
 def paypal_transfer_acct
@@ -99,12 +141,16 @@ end
 # - Try to match against one of the CSV fields directly
 # - Try to match against a salted hash of lowercase(Email) or lowercase(Name)
 def categorize(cats, row)
+    #$stderr.puts "DEBUG:",row
 	candidates_columns = [
 		'Name',
 		'To Email Address',
 		'From Email Address',
 		'Subject',
-		'Note',
+        'Note',
+        'Item Title',
+        'Transaction ID',
+        'Type',
 	]
 	candidate_text = candidates_columns.map { |x|
 		row[x]
@@ -167,7 +213,7 @@ end
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    Assets:Clearing:Paypal-Exchange  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
-<% elsif csvrow['Type'] =~ /Debit Card Cash Back Bonus/ -%>
+<% elsif csvrow['Type'] =~ /(Debit Card )?Cash Back Bonus/ -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    Income:Rebate  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
@@ -176,13 +222,13 @@ end
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= bank_transfer_acct(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <% -%>
-<% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/].any? { |r| csvrow['Type'] =~ r } then -%>
+<% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/, /Account Hold for Open Authorization/, /Reversal of General Account Hold/, /General Authorization/, /Void of Authorization/].any? { |r| csvrow['Type'] =~ r } then -%>
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    ; SKIP <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <%= memo %>    <%= paypal_transfer_acct() %>
 <% -%>
-<% elsif csvrow['Type'] =~ /Refund/ then
+<% elsif csvrow['Type'] =~ /Refund/i then
 # The signs of some of the refunds are wrong, so they need special handling
 # The Fee is refunded, and needs flipping manually
 # (alternatively, we ignore the fee on the refund, and change the fee refund special transaction AWAY from being a memo)
