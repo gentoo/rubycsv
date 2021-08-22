@@ -81,8 +81,10 @@ $categories = [["Unknown", "DEFAULT"],
     #  ".*Accounting"],
     [ "Expenses:Accounting",
       ".*CORPORATE CAPITAL"],
+    [ "Expenses:Accounting",
+      ".*CORPORATE CAPITA"], # Paypal truncates their name sometimes!
     [ "Expenses:Events",
-      ".*(9D0425387F676360E|0XX376078W200444L|2SP58554T93029521)"],
+      ".*(9D0425387F676360E|0XX376078W200444L|2SP58554T93029521|108573749C2322059)"],
     [ "Expenses:Project:Nitrokey",
       ".*shop@nitrokey.com"],
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201206",
@@ -188,7 +190,7 @@ def categorize(cats, row)
 end
 
 def category_to_program(cat)
-  return 'Foundation' if cat =~ /Expenses:Fees:(Legal|Accounting|Mail|Phone)/
+  return 'Foundation' if cat =~ /Expenses:(Fees:)?(Legal|Accounting|Mail|Phone)/
   return 'PR' if cat =~ /Expenses:Events/
   return 'GSOC' if cat =~ /GSOC/
   return 'Nitrokey' if cat =~ /Nitrokey/
