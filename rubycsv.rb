@@ -101,7 +101,7 @@ def tablematch(table, value)
         end
     end
 	#print "  val: #{value} matches #{item}, returning #{rowfirst}\n"
-	STDERR.puts "fallback on #{value}"
+	##STDERR.puts "fallback on #{value}"
     return default
 end
 
@@ -150,9 +150,9 @@ csv.each() do |row|
 end
 
 def paypal_row_to_time(row)
-	STDERR.puts row.csvrow
+	#STDERR.puts row.csvrow
 	if not row.csvrow.include?('Time') then
-		STDERR.puts row
+		#STDERR.puts row
 	end
 	date = row['Date']
 	# Sadly Paypal data precision sucks; if the seconds are missing, let's just add them as zero

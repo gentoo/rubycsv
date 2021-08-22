@@ -187,6 +187,35 @@ def categorize(cats, row)
 	return tablematch(cats, candidate_text + ' ' + candidate_hashed)
 end
 
+def category_to_program(cat)
+  return 'Foundation' if cat =~ /Expenses:Fees:(Legal|Accounting|Mail|Phone)/
+  return 'PR' if cat =~ /Expenses:Events/
+  return 'GSOC' if cat =~ /GSOC/
+  return 'Nitrokey' if cat =~ /Nitrokey/
+  return 'Infra' if cat =~ /Expenses:Hosting:(Amazon|Hetzner)/
+  return nil
+  #; Foundation
+  #; GSOC
+  #; Infra
+  #; Nitrokey
+  #; PR
+  # These Program categories are wrong and should be corrected
+  #; General -- FIXME
+  #; Dev -- FIXME
+  #; Legal -- FIXME
+  #; Releng -- FIXME
+end
+def category_to_metadata(cat)
+  md = {}
+  program = category_to_program(cat)
+  md['Program'] = program if program
+  md['Reference'] = 'TODO' if program or cat =~ /Expense/
+  md['TaxImplication'] = 'TODO' if program or cat =~ /Expense/
+  md['TaxImplication'] = 'Reimbursement' if cat =~ /Expense.*Reimbursement/
+  md['Entity'] = 'TODO' if cat =~ /Expense/
+  return md
+end
+
 # The trailing spaces on each line are important!
 $validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed', 'Updated' ]
 $memoprefix = ';MEMO '
@@ -245,19 +274,23 @@ end
 -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + negative_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= $category = categorize($categories, csvrow); $category %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% elsif csvrow['Type'] =~ /Payment Sent/ or csvrow['Type'] =~ /Cancell?ed Payment/ then -%>
 <% # TODO: improve this code, we override the DEFAULT in a dumb way -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= categorize($categories+[['Expenses:Unspecified:Paypal','DEFAULT']], csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= $category = categorize($categories+[['Expenses:Unspecified:Paypal','DEFAULT']], csvrow); $category %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% else -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
-<%= memo %>    <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
+<%= memo %>    <%= $category = categorize($categories, csvrow); $category %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
+<% end -%>
+<% $md = category_to_metadata($category) -%>
+<% $md.each_pair do |tag,value| -%>
+<%= memo %>    ; <%= tag %>: <%= value %>
 <% end -%>
 <%= memo %>    ; Name:<%= cleanprefix(csvrow['Name']) %>
 <%= memo %>    ; To.email:<%= cleanprefix(csvrow['To Email Address']) %>
