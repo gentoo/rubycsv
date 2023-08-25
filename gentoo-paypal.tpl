@@ -69,7 +69,7 @@ $categories = [["Unknown", "DEFAULT"],
       ".*malwarepatrol.*"],
 	[ "Expenses:Phone",
       # voip.ms, legal company name is '9171-5573 Quebec' d/b/a SwiftVox/Voip.MS
-      ".*(payments@swiftvox.com|9171-5573 Quebec).*"],
+      ".*(payments@swiftvox.com|9171-5573 Quebec|VOIP.MS).*"],
     [ "Expenses:Accounting",
       # This is the HMAC-SHA1 for the accountant's lowercase name & email, for 2017 July-Dec.
       # It was specifically used in place of the name/email to protect the
@@ -97,6 +97,7 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201911", ".*(0TL83255MC162162M|631750465G2367318)"],
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201907", ".*(9D469133EF7019638)"],
     [ "Expenses:Infra:Parts", ".*(21K67528SF984330G|6H167528BN380453S)" ], # tech for less
+    [ "Expenses:Infra:Parts", ".*(81376595W2242272D|4K110430ND5570122)" ], # CDW: serial cable parts for OSUOSL
     [ "Expenses:Fees:Legal",
       ".*OFFICE OF THE NM SOS"],
     [ "Expenses:Fees:Legal",
@@ -194,6 +195,8 @@ def category_to_program(cat)
   return 'GSOC' if cat =~ /GSOC/
   return 'Nitrokey' if cat =~ /Nitrokey/
   return 'Infra' if cat =~ /Expenses:Hosting:(Amazon|Hetzner)/
+  return 'Infra' if cat =~ /Expenses:Infra:Parts/
+  return 'Infra' if cat =~ /Expenses:Shipping/
   return nil
   #; Foundation
   #; GSOC
