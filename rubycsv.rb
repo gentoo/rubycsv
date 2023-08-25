@@ -44,7 +44,7 @@ end
 
 
 
-def clean_money(text_money, positive = FALSE) # nuke all but digits, negation, decimal place
+def clean_money(text_money, positive = false) # nuke all but digits, negation, decimal place
     if text_money.nil?
         return ""
     end
@@ -199,7 +199,7 @@ $data.sort_by(&method(:sorter_date_time_tz)).each do |tuple|
     #row = $data[key]
     $line = key
     #print "line: #{thisrow.csvrow.inspect}\n"
-    erbrender = ERB.new($erb_template, safe_level=nil, trim_mode='-')
+    erbrender = ERB.new($erb_template, trim_mode:'-')
     puts erbrender.result(row.get_binding).rstrip()
     puts "\n"
 end
