@@ -65,8 +65,16 @@ $categories = [["Unknown", "DEFAULT"],
       ".*OPEN ?GEAR.*"],
 	[ "Expenses:Mail",
       ".*Traveling ?Mail(box)?.*"],
+    # Antispam
 	[ "Expenses:Services",
       ".*malwarepatrol.*"],
+	[ "Expenses:Services",
+      ".*ppsales.2checkout.com.*"],
+	[ "Expenses:Services",
+      ".*2Checkout.com.*"],
+	[ "Expenses:Services",
+      ".*(35A12063HE9515104|1VY55057LW612912E|6UT15274HL558444C|0X0697041H1405258|92J157367U561180X).*"],
+    # Phone
 	[ "Expenses:Phone",
       # voip.ms, legal company name is '9171-5573 Quebec' d/b/a SwiftVox/Voip.MS
       ".*(payments@swiftvox.com|9171-5573 Quebec|VOIP.MS).*"],
@@ -107,8 +115,8 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Expenses:Donations",
       ".*billing@yapc.org.*18380511HB907902B"],
     [ "Expenses:GSOC:Mentor-Travel-Reimbursement",
-      ".*(1CR38323CY8432902|4KP10148XA437243W|87N49081CL3000742|8XX66840L62895546|25T96197D6407310R|35A20655SN352982E|0K4406155H379924V|62106544S9576952X|95K44436CC206273Y|9G410934RY513593K)"],
-    [ "Expenses:Services", ".*44M47848WL891505S" ],
+      ".*(1CR38323CY8432902|4KP10148XA437243W|87N49081CL3000742|8XX66840L62895546|25T96197D6407310R|35A20655SN352982E|0K4406155H379924V|62106544S9576952X|95K44436CC206273Y|9G410934RY513593K).*"],
+    [ "Expenses:Services", ".*44M47848WL891505S.*" ],
 	[ "Expenses:Shipping", ".*(1WV28590181169742|4W705354M59480838).*"],
     [ "Income:Donations:Cash", ".*88F402144B854453W"],
     [ "Income:Donations:Cash", ".*(9SP30539DD333753R|6BB79733GL4773515).*"], # whatbox.ca special donation
@@ -197,6 +205,7 @@ def category_to_program(cat)
   return 'Infra' if cat =~ /Expenses:Hosting:(Amazon|Hetzner)/
   return 'Infra' if cat =~ /Expenses:Infra:Parts/
   return 'Infra' if cat =~ /Expenses:Shipping/
+  return 'Infra' if cat =~ /Expenses:Services/ # AntiSpam: TODO should have had a better category
   return nil
   #; Foundation
   #; GSOC
