@@ -120,6 +120,7 @@ $categories = [["Unknown", "DEFAULT"],
 	[ "Expenses:Shipping", ".*(1WV28590181169742|4W705354M59480838).*"],
     [ "Income:Donations:Cash", ".*88F402144B854453W"],
     [ "Income:Donations:Cash", ".*(9SP30539DD333753R|6BB79733GL4773515).*"], # whatbox.ca special donation
+    [ "Income:Donations:Cash", ".*(payments@whatbox.ca|Whatbox Inc).*"], # whatbox.ca special donation - they run Gentoo and donate to us.
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_202206", ".*(35M001159N645891H).*"],
     # Generic stuff after this!
     [ "Expenses:Unspecified:Paypal", ".*General PayPal Debit Card Transaction"],
