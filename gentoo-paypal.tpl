@@ -122,6 +122,10 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Income:Donations:Cash", ".*(9SP30539DD333753R|6BB79733GL4773515).*"], # whatbox.ca special donation
     [ "Income:Donations:Cash", ".*(payments@whatbox.ca|Whatbox Inc).*"], # whatbox.ca special donation - they run Gentoo and donate to us.
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_202206", ".*(35M001159N645891H).*"],
+    [ "Expenses:Infra:Parts", ".*(82A46404RY638290U|2G5157427S694200T|0B486972CS123811C).*" ], # Parts to repair muta, bug 917276, bug 912218 - GOTO DIRECT never filled the ordered and later refunded us.
+    [ "Expenses:Infra:Parts", ".*(3A746282A3546822J).*" ], # Parts to repair muta, bug 917276, bug 912218 - Ebay instead.
+    [ "Assets:Clearing:Paypal-CapOneMoneyMarket", ".*(5T7566147N698112K).*" ], # Transfer to bank
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(0L616126CV288852U).*" ], # expenses/20170930_gossamer.txt
     # Generic stuff after this!
     [ "Expenses:Unspecified:Paypal", ".*General PayPal Debit Card Transaction"],
     [ "Expenses:Unspecified:Paypal", ".*General Payment"],
@@ -163,6 +167,7 @@ def categorize(cats, row)
         'Note',
         'Item Title',
         'Transaction ID',
+        'Reference Txn ID',
         'Type',
 	]
 	candidate_text = candidates_columns.map { |x|
