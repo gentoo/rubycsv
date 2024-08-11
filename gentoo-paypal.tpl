@@ -28,6 +28,7 @@ $categories = [["Unknown", "DEFAULT"],
     # check with a CPA
     [ "Income:Donations:Cash",
       ".*Developer Conference 2005"],
+
     # Unknown why this string appears, but it's used for a few legit donations
     [ "Income:Donations:Cash",
       ".*Turtles asked me to.*"],
@@ -43,8 +44,15 @@ $categories = [["Unknown", "DEFAULT"],
 	  ".*CafePress.com.*"],
 	[ "Expenses:Donations",
       ".*OSU FOUNDATION.*"],
-	[ "Assets:Capital:Computers:Infra",
-      ".*AMFELTEC.*20171002-06.*"],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201803", ".*(401844640E578200X|78U542504S934074X|65E55533GB6433848|2VG36155M20278332|1PD49130DF689024U|706341040J967745Y|6D415123KP5058829).*" ],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201804", ".*(9ET19122EE380315M).*" ],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(02237943E30318500|9PY24159LC589423C).*" ],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201812", ".*(7XX62967MJ438740S).*" ],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_202403", ".*(6085561423767530P).*" ],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(0L616126CV288852U).*"],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*AMFELTEC.*20171002-06.*"],
+    [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(9TD13044BS6661315|9YX63856KP650794X|O-5P9671182G6393511|61P13891G0307580K)" ], # Newegg purchase & refund
+    [ "Expenses:Infra:Parts", ".*(5CU61952B6970604T|3FN50445E0175032C|7HH18346SA0209943).*" ], # https://bugs.gentoo.org/666994
 	[ "Assets:Capital:Computers:Infra",
       ".*NewEgg.*"],
 	[ "Expenses:Hosting:Amazon",
@@ -64,7 +72,8 @@ $categories = [["Unknown", "DEFAULT"],
 	[ "Assets:Capital:Computers:Infra",
       ".*OPEN ?GEAR.*"],
 	[ "Expenses:Mail",
-      ".*Traveling ?Mail(box)?.*"],
+   ".*Traveling ?Mail(box)?.*"],
+
     # Antispam
 	[ "Expenses:Services",
       ".*malwarepatrol.*"],
@@ -73,7 +82,8 @@ $categories = [["Unknown", "DEFAULT"],
 	[ "Expenses:Services",
       ".*2Checkout.com.*"],
 	[ "Expenses:Services",
-      ".*(35A12063HE9515104|1VY55057LW612912E|6UT15274HL558444C|0X0697041H1405258|92J157367U561180X).*"],
+   ".*(35A12063HE9515104|1VY55057LW612912E|6UT15274HL558444C|0X0697041H1405258|92J157367U561180X).*"],
+
     # Phone
 	[ "Expenses:Phone",
       # voip.ms, legal company name is '9171-5573 Quebec' d/b/a SwiftVox/Voip.MS
