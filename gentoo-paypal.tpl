@@ -179,6 +179,7 @@ def categorize(cats, row)
         'Transaction ID',
         'Reference Txn ID',
         'Type',
+        'Description', # FY2025
 	]
 	candidate_text = candidates_columns.map { |x|
 		row[x]
@@ -247,6 +248,8 @@ end
 
 # The trailing spaces on each line are important!
 $validstatus = [ 'Canceled', 'Cancelled', 'Cleared', 'Completed', 'Paid', 'Pending', 'Placed', 'Refunded', 'Removed', 'Returned', 'Reversed', 'Updated' ]
+$valid = ($validstatus.include? csvrow['Status']) # was removed in FY2025 data
+$valid = true # TODO: only if 'status' column is missing
 $memoprefix = ';MEMO '
 transcur = tablematch($currency,csvrow['Currency']) + " "
 memo = csvrow["Balance Impact"] == 'Memo' ? $memoprefix : ''
@@ -264,31 +267,31 @@ if transcur == '$ ' then
   balance = '= ' + transcur + clean_money(balval)
 end
 -%>
-<% if (($validstatus.include? csvrow['Status']) && (csvrow['Type'] != "Shopping Cart Item") && (csvrow['Type'] != 'Transfer to Bank Initiated')) -%>
+<% if ($valid && (csvrow['Description'] != "Shopping Cart Item") && (csvrow['Description'] != 'Transfer to Bank Initiated')) -%>
 ; CSV "<%= $csv_filename %>", line: <%= $line %>
-<%= memo %><%= clean_date(csvrow['Date'], '%m/%d/%Y') %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Type'] %>
+<%= memo %><%= clean_date(csvrow['Date'], '%m/%d/%Y') %> Paypal <%= clean_text(csvrow['Name'] + ' ' + csvrow['To Email Address'] + ' ' + csvrow['Item Title']) %> ID: <%= csvrow['Transaction ID'] %><%= refid %>, <%= csvrow['Description'] %>
 <% -%>
 <% if false then -%>
-<% elsif csvrow['Type'] =~ /Currency Conversion/ -%>
+<% elsif csvrow['Description'] =~ /Currency Conversion/ -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    Assets:Clearing:Paypal-Exchange  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
-<% elsif csvrow['Type'] =~ /(Debit Card )?Cash Back Bonus/ -%>
+<% elsif csvrow['Description'] =~ /(Debit Card )?Cash Back Bonus/ -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    Income:Rebate  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
-<% elsif csvrow['Type'] =~ /Funds.*Bank Account/ or csvrow['Type'] =~ /Transfer.*Bank/ then -%>
+<% elsif csvrow['Description'] =~ /Funds.*Bank Account/ or csvrow['Description'] =~ /Transfer.*Bank/ then -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= bank_transfer_acct(csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <% -%>
-<% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/, /Account Hold for Open Authorization/, /Reversal of General Account Hold/, /General Authorization/, /Void of Authorization/].any? { |r| csvrow['Type'] =~ r } then -%>
+<% elsif [/Temporary Hold/, /Pending Balance Payment/, /Update to Reversal/, /Account Hold for Open Authorization/, /Reversal of General Account Hold/, /General Authorization/, /Void of Authorization/].any? { |r| csvrow['Description'] =~ r } then -%>
 <% # There we must IGNORE the Fee on the temporary hold, because it is ALSO included in the referenced transaction -%>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    ; SKIP <%= categorize($categories, csvrow) %>  <%= transcur + negate_num(clean_money(csvrow['Net'])) %>
 <%= memo %>    <%= paypal_transfer_acct() %>
 <% -%>
-<% elsif csvrow['Type'] =~ /Refund/i then
+<% elsif csvrow['Description'] =~ /Refund/i then
 # The signs of some of the refunds are wrong, so they need special handling
 # The Fee is refunded, and needs flipping manually
 # (alternatively, we ignore the fee on the refund, and change the fee refund special transaction AWAY from being a memo)
@@ -305,7 +308,7 @@ end
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>
 <%= memo %>    <%= $category = categorize($categories, csvrow); $category %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
-<% elsif csvrow['Type'] =~ /Payment Sent/ or csvrow['Type'] =~ /Cancell?ed Payment/ then -%>
+<% elsif csvrow['Description'] =~ /Payment Sent/ or csvrow['Description'] =~ /Cancell?ed Payment/ then -%>
 <% # TODO: improve this code, we override the DEFAULT in a dumb way -%>
 <%= memo %>    Expenses:Fees:Paypal  <%= transcur + positive_num(clean_money(csvrow['Fee'])) %>
 <%= memo %>    Assets:Paypal  <%= transcur + clean_money(csvrow['Net']) %> <%= balance %>

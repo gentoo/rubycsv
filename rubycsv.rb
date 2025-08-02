@@ -130,6 +130,9 @@ known_paypal_headers = [
   'To Email Address',
   'Town/City', 'Transaction ID', 'Type',
   'Zip/Postal Code',
+  # New in 2025 format
+  'Bank Name', 'Bank Account',
+  'Invoice ID'
 ]
 
 filemode = 'r:ISO-8859-1'
@@ -198,7 +201,8 @@ $data.sort_by(&method(:sorter_date_time_tz)).each do |tuple|
 	key, row = tuple
     #row = $data[key]
     $line = key
-    #print "line: #{thisrow.csvrow.inspect}\n"
+    #print "# line: #{thisrow.csvrow.inspect}\n"
+    print "# line: #{row.inspect}\n"
     erbrender = ERB.new($erb_template, trim_mode:'-')
     puts erbrender.result(row.get_binding).rstrip()
     puts "\n"
