@@ -139,6 +139,8 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Assets:Clearing:Paypal-CapOneMoneyMarket", ".*(5T7566147N698112K).*" ], # Transfer to bank
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(0L616126CV288852U).*" ], # expenses/20170930_gossamer.txt
     [ "Expenses:Shipping", ".*(1L600948461440509).*" ], # clearance cost on the Token2 key samples to the USA
+    [ "Expenses:Project:Token2", ".*(info@securitykey.ch).*" ], # Token2 direct cost
+
     # Generic stuff after this!
     [ "Expenses:Unspecified:Paypal", ".*General PayPal Debit Card Transaction"],
     [ "Expenses:Unspecified:Paypal", ".*General Payment"],
@@ -216,11 +218,15 @@ def categorize(cats, row)
 	return tablematch(cats, candidate_text + ' ' + candidate_hashed)
 end
 
-def category_to_program(cat)
+def category_to_program(cat, csvrow)
+  # special cases first
+  return 'Token2' if csvrow.to_s =~ /1L600948461440509/ and cat =~ /Expenses:Shipping/
+  # general cases
   return 'Foundation' if cat =~ /Expenses:(Fees:)?(Legal|Accounting|Mail|Phone)/
   return 'PR' if cat =~ /Expenses:Events/
   return 'GSOC' if cat =~ /GSOC/
   return 'Nitrokey' if cat =~ /Nitrokey/
+  return 'Token2' if cat =~ /Token2/
   return 'Infra' if cat =~ /Expenses:Hosting:(Amazon|Hetzner)/
   return 'Infra' if cat =~ /Expenses:Infra:Parts/
   return 'Infra' if cat =~ /Expenses:Shipping/
@@ -237,9 +243,9 @@ def category_to_program(cat)
   #; Legal -- FIXME
   #; Releng -- FIXME
 end
-def category_to_metadata(cat)
+def category_to_metadata(cat, csvrow)
   md = {}
-  program = category_to_program(cat)
+  program = category_to_program(cat, csvrow)
   md['Program'] = program if program
   md['Reference'] = 'TODO' if program or cat =~ /Expense/
   md['TaxImplication'] = 'TODO' if program or cat =~ /Expense/
@@ -320,7 +326,7 @@ end
 <%= memo %>    <%= $category = categorize($categories, csvrow); $category %>  <%= transcur + negate_num(clean_money(csvrow['Gross'])) %>
 <% -%>
 <% end -%>
-<% $md = category_to_metadata($category) -%>
+<% $md = category_to_metadata($category, csvrow) -%>
 <% $md.each_pair do |tag,value| -%>
 <%= memo %>    ; <%= tag %>: <%= value %>
 <% end -%>
