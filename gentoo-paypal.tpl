@@ -119,7 +119,7 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Expenses:Fees:Legal",
       ".*OFFICE OF THE NM SOS"],
     [ "Expenses:Fees:Legal",
-      ".*US PATENT TRADEMARK.*6H108086SY709645J"],
+      ".*US PATENT TRADEMARK.*(6H108086SY709645J|39A67621H9497942K|89501558XE917210U|6E496199V8339433M|39A67621H9497942K|5C9891992B585205L|09F70447CK1110905)"],
     [ "Expenses:Fees:Legal",
       ".*8EE53557TT6255427"],
     [ "Expenses:Donations",
@@ -138,6 +138,7 @@ $categories = [["Unknown", "DEFAULT"],
     [ "Expenses:Infra:Parts", ".*(2P442593H9252823A|2KP06125F5510500U).*" ], # Parts to repair muta, bug 917276, bug 912218 - Ebay instead.
     [ "Assets:Clearing:Paypal-CapOneMoneyMarket", ".*(5T7566147N698112K).*" ], # Transfer to bank
     [ "Assets:Capital:Computers:Infra:Purchased_GDS5_201710", ".*(0L616126CV288852U).*" ], # expenses/20170930_gossamer.txt
+    [ "Expenses:Shipping", ".*(1L600948461440509).*" ], # clearance cost on the Token2 key samples to the USA
     # Generic stuff after this!
     [ "Expenses:Unspecified:Paypal", ".*General PayPal Debit Card Transaction"],
     [ "Expenses:Unspecified:Paypal", ".*General Payment"],
